@@ -1,4 +1,4 @@
-import express from 'express';
+const express = require('express');
 const router = express.Router();
 const Certificate = require('../models/Certificate');
 const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
