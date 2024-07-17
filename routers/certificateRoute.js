@@ -11,41 +11,41 @@ async function generatePDF(name, course, date) {
     const existingPdfBytes = fs.readFileSync('./template.pdf');
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
 
-    
+
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
 
-    
+
     const page = pdfDoc.getPage(0);
 
-    
+
     const detailsFontSize = 17;
     const textFontSize = 48;
 
-    
+
     const pageWidth = page.getWidth();
     const nameTextWidth = font.widthOfTextAtSize(name, textFontSize);
     const nameX = (pageWidth - nameTextWidth) / 2;
 
-  
+
     page.drawText(name, {
         x: nameX,
-        y: 373, 
+        y: 373,
         size: textFontSize,
         font: timesRomanFont,
         color: rgb(244 / 255, 210 / 255, 25 / 255),
     });
 
-    
+
     const details = `For successfully completing the TuteDude ${course}\ncourse on ${date}.`;
     const detailsLines = details.split('\n');
 
-    let y = 330; 
+    let y = 330;
 
     detailsLines.forEach(line => {
         const textWidth = font.widthOfTextAtSize(line, detailsFontSize);
-        const textX = (pageWidth - textWidth) / 2; 
+        const textX = (pageWidth - textWidth) / 2;
         page.drawText(line, {
             x: textX - 5,
             y: y,
@@ -53,33 +53,33 @@ async function generatePDF(name, course, date) {
             font: boldFont,
             color: rgb(0, 0, 0),
         });
-        y -= detailsFontSize + 10; 
+        y -= detailsFontSize + 10;
     });
-    
+
     const pdfBytes = await pdfDoc.save();
 
-    
+
     const pdfPath = `./${name}_certificate.pdf`;
     fs.writeFileSync(pdfPath, pdfBytes);
 
-    
+
     return pdfPath;
 }
 
 // Google Drive upload function
-async function uploadToGoogleDrive(filePath,name) {
+async function uploadToGoogleDrive(filePath, name) {
     const auth = new google.auth.GoogleAuth({
         credentials: {  /* Google drive upload keys */
             type: "service_account",
             project_id: "tutedute",
-            private_key_id: "db7e77fe92d14d6c201eec501a1599e34b7c8e82",
-            private_key: "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCmv2fnGf7xo5ec\nTbhKLGS4FitkBdRSuOHwnm/KiWe+Pg1Eq5DhbAwPKH34uAC4TZcxF/SWEp8tgYeT\n3tf8tYi+zUQUHPV8mLsTff8Hs2h/21KulotgqCizEJaVzDgLw0uBn1s/+vQI+Miy\nUMtKiynweOb31yXyXVTnvh6k+Kx+6KeddVEltjDuWq5bK+bBrG6LJZx1MStwodOC\nhTVWe8/dWlz0DBunLfwvy6MPSrn/W89H9LSb2TMogPteYp8qFCWmSu5RemLH9c9i\nMSUmKNWx2ONpejW9hMnRmrdxB+1C86EHyFNVZG7DK1Psd9cmgG1tJoLWQkeMcYAu\nheCoh6apAgMBAAECggEAAWTK0PVOsPua1oc8rCvW+Cxt3RDigehlpNtk9Q9x5un+\nT6WzXDtivISZJllR+GuXZ2VE1oIt/MU1dxFdfHFFsc2SqfkSsRswMug8BIpI+QrO\n4NXYiqMBLkgsIz3XaPuPOVR109D/yOyDNe1W5togrFZAXPYz02s/b+ciIUm3gse6\nbftwm4WN1+A8fhIhvAG70wP0ETqjGDLVOSKPZlGFXYRFINApMrTzp1nw+mwGOmDK\nlsrMms9x+xi6bWzin6iXGkLS5lUAatpgz9p2XrYr8iJyusmwet+WBBnmCGD78pcF\nTXdRT0yvObw2GiC/iXCGpRLCkbpk7Dz6/l9qZzAWcQKBgQDdkN4wzQhFtn/GyzL1\nQJbemi8szF4QEKKuicmXZ3XBAr5RvY/Id5o5BNYEe8TESwoQD6USKUWd/eXfXPVp\nWdUtGvzGpcd+z1VPMMNAWAIz5NJ0ey+ClX9JXBZ1viruL9Lo6L5bvYMBhuNXDpLP\nQO9GKzZy0PYFbLJ8WCk22CmYeQKBgQDAqY/+EqpoICKcLSEY+hVHbt07IFuYg2uX\n6CNi6wGsLgac0nSbx5TPGGh9okdM6+mjR8kiUgaisC466DgV0J0E1bG9voJAd+Ma\nJSxoZgHHRHJBQR6t5IqDX9A1LzRIuo6tZt9DWoVWF7qxIHfFM1y/ded9g3aNd9/O\nx8+/KIZTsQKBgQDFUMpPM4j2bHyGkVekSg0R2MXCY44xSF9YiKTbDOw1IzhSmzp9\nEOZreP8PpxmophskCoq7Db5N4Vrh/GshkzrhnHMYhXKQYBxdFdQMbVQo2tMBoOLC\nrFhbAIOP//dDf5uYiA1erfsJVRMI6JWdtPphxwIKZkVyt0aMrgamLQN+IQKBgBJN\niYJnn4y40NDpcKWAzJi2rYm6bzkz8vrBcOsqzEPhM3ueerl54mcyOGsHCaMDHnUG\nktMR29OEzT+HZByebuxQqMwP1yvst8R6F5fraOvXUstkNlfqyEXmyk7jJyJpprhO\nd5NcfCJLqs68+OPhF0SRHObNoGucIcTxMolEfk5hAoGAPLoOfUaGc1IB5a7Laef4\nkI2koMgJafavia6joXV+SEiknEgOTDkGV6yQqQC8BYUfT8C+Lfbcf+QNa6q80lPl\n+bipfZd+vkUZA9kv1qTc0CM3tut4jXasDb5RTF8jT4qbgROljbQYCa6BCPyQddPS\nuarw5O8UFyjVUvhcfMDeMMs=\n-----END PRIVATE KEY-----\n",
+            private_key_id: "078ea4a93d4d841fdeb2e03b4d7d0e80681c92c1",
+            private_key: "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC6mB44L7g3y35j\nkB0rEywMGWUYzn4dF85ekAsGUb6FWPFhInF4ZUtGFXeJXqNrftQWlUYrh7YV6997\nR7Ow9TeqeOf9uWS5xICqL3do3eWzMfZ/iru2u1T2Dc2AYCWVpzQOUnZC/zVPMumd\nolWSch/YXAJ2xF+CIe3VEI25xVxRw6zGEEBraZqzSw9kVucIK7jx2qdb3jEdONKG\n1APHdn/57IR7zNivpTeu4DFLIiszmCVhviWoMnIpmTnZFKIOFKnG9Lad1CFLQRHw\nzR5UTUtZ6Q1Nkt4jN6Q3c8GA8Tp/4suIGk5y54uEhLP8nM5hrQ5wcpj12nqFl629\nSvcw2ZWHAgMBAAECggEALIYbv+BzHq0p7Wv36c1bV0+/9dlf8mU50wqf9tQOmBcP\nEdR8KvRQr9pzeY3hhMbwqKrZ4Y0yf6yW2P3U/Mamj8Dl6n8Qb9tZsEI/RgCczNOB\nNBHQlNvCfCvy+0z16u3I2BoJKhdniwxk/j48GQOuYZwi4mAdQhoCfDLE/qz/SGr1\nAVT04x40ChX1cOEfsIfs2tOlFTdRxiWfT+ug1xIpAE1RiKN87ohOHZV8tDJn1J7q\ny5XyFQohCyrRrNmueQyb+bGXSfxhmvb+QFEpHx73MOkpEBPqtKTvFsVxtO78Wt67\n2pMfMMZ7dbKZXlb2l1XcyfhSuspGJIPObrlQ7ARiwQKBgQD/PMSdF6DitW3k17Ou\nteVfjx7pxKZ9dIyhJs7WYda7NnHJpMoQBpqfDEjG9jySGjSElro5/DatXkjQQuiv\n9dW4B0q/eYSaRD/zpEx2GX0R/Y9epDMGc0NAFJhtjZ7cKiBukZU4MqVbvlcBvv4a\nVv1MbF4tDnDN15Lh9VPw0BqENwKBgQC7Jtg5JdS3M35Kjl0UedT6XBQsw6Pkz74D\nQDarPbJdOtBypa/CorwjhfMmdxfBpe7Z8z3YLMg7wL24VWNjCdJ9ezXI+/q8TqoC\nDgr2m0Qna7uT3AIgKoq9uD596v6H82vAgZYucreoF+5kErlfLD0IP2NIVErI466C\nNDXDEuZxMQKBgQCWX2PqtWgJCSDkiRyIWwv2/6gTy9LW6NqNewKzFVNgWtQxG5Ac\nXverqp4Z8ip/XUcBspem3+wKuhil8jWKrYgrcshcBKjWBk2zKmIN1jh0Z/GWraCO\nNUwyra+cI6qrRXp0Cfti75uycHJsSe0E8akr5FCbtP1KmK4lx9abcs+cgwKBgHDL\nwaf32BOukmBHG2x63VUjZ/lu1HnUh1YYPprIrZapGvbuS1dIk5Hpapn1TzkkVCfC\nBbUjkG8LBI1z0Vngkp+UQd9nl0AlPSvN4Oeuvs3vjXdZM2LFoSclQ2zK1CuGF5xH\nvgcyluRVwBVKf7UPyZ0N7z2pqAUZzJSm+PwgiQkRAoGBAI5Kkcg9G9/v9jjGGHBR\nB7/pyMuxfFnHwzl37FEmUIH6PAatkDbgYEAfZSvK99QdSOBVjHM2b+/gNQWGIO0I\nzO5uf52tK8AX0q5s4VdFYEdVJZAXrNxcWff0arLiae66avEE38ZDgu+1n7zdcJdM\nxarVEbQy5/LdgpUb4ooeS+p1\n-----END PRIVATE KEY-----\n",
             client_email: "tutedute@tutedute.iam.gserviceaccount.com",
-            client_id: "113142431559446377739",
+            client_id: "101868881153948274020",
             auth_uri: "https://accounts.google.com/o/oauth2/auth",
             token_uri: "https://oauth2.googleapis.com/token",
             auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
-            client_x509_cert_url: "https://www.googleapis.com/robot/v1/metadata/x509/tutedute%40tutedute.iam.gserviceaccount.com"
+            client_x509_cert_url: "https://www.googleapis.com/robot/v1/metadata/x509/tutedute%40tutedute.iam.gserviceaccount.com",
         },
         scopes: ['https://www.googleapis.com/auth/drive.file'],
     });
@@ -106,7 +106,7 @@ async function uploadToGoogleDrive(filePath,name) {
 router.post('/generate', async (req, res) => {
     const { name, course, date, email } = req.body;
     const pdfPath = await generatePDF(name, course, date);
-    const pdfLink = await uploadToGoogleDrive(pdfPath,name);
+    const pdfLink = await uploadToGoogleDrive(pdfPath, name);
 
     const certificate = new Certificate({ name, course, date, email, pdfLink });
     await certificate.save();
