@@ -11,6 +11,7 @@ const certificateRoute=require('./routers/certificateRoute');
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(cors());
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
 dotenv.config();
 
